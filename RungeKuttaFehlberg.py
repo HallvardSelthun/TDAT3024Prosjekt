@@ -85,19 +85,21 @@ class RungeKuttaFehlberg54:
         self.h=stepLength        
         
 def F(Y):
-    M=np.array([[0.49119653, 0.32513304, 0.98057799],
-                [0.20768544, 0.97699416, 0.18220559],
-                [0.96407071, 0.18373237, 0.95307793]])
-    res=np.ones(4)               
-    res[1:4]=M.dot(Y[1:4])
+    res = [Y[0]+ 3*Y[1]],[2*Y[0] + 2*Y[1]]
+
+    # M=np.array([[0.49119653, 0.32513304, 0.98057799],
+    #             [0.20768544, 0.97699416, 0.18220559],
+    #             [0.96407071, 0.18373237, 0.95307793]])
+    # res=np.ones(4)
+    # res[1:4]=M.dot(Y[1:4])
     return res
 
 def main():
-    W  =np.array([0,1,1,1])
+    W  =np.array([5, 0])
     h=0.1
     tol=05e-14
     tEnd=2.0
-    rkf54 = RungeKuttaFehlberg54(F,4,h,tol)
+    rkf54 = RungeKuttaFehlberg54(F,2,h,tol)
 
     while(W[0]<tEnd):
         W , E = rkf54.safeStep(W)
