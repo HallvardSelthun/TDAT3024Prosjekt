@@ -18,10 +18,10 @@ class RungeKuttaFehlberg54:
          [1932/2197,-7200/2197, 7296/2197 ,    0     ,  0   ,0],
          [ 439/216 ,   -8     , 3680/513  , -845/4104,  0   ,0],
          [  -8/27  ,    2     ,-3544/2565 , 1859/4104,-11/40,0]])
-  
+  #         s1          s2          s3          s4      s5
     B=np.array(
-        [[  25/216 ,    0     , 1408/2565 , 2197/4104 ,-1/5 ,0],
-         [  16/135 ,    0     , 6656/12825,28561/56430,-9/50,2/55]])
+        [[  25/216 ,    0     , 1408/2565 , 2197/4104 ,-1/5 ,0], #s1, s2, s3, s4, s5 s6
+         [  16/135 ,    0     , 6656/12825,28561/56430,-9/50,2/55]]) #s1, s2, s3, s4, s5 s6
 
     def __init__(self,
                  function,
@@ -33,12 +33,11 @@ class RungeKuttaFehlberg54:
         self.h=stepsize
         self.tol=tolerance
     
-    def step(self,
-             Win):
-        s=np.zeros((6,self.dim))
+    def step(self, Win):
+        s=np.zeros((6, self.dim))
         
         for i in range(0,6):
-            s[i,:]=self.F(Win+self.h*self.A[i,0:i].dot(s[0:i,:]))
+            s[i,:]=self.F(Win+self.h*self.A[i,0:i].dot(s[0:i,:]), len(Win))
 
         Zout=Win+self.h*(self.B[0,:].dot(s))
         Wout=Win+self.h*(self.B[1,:].dot(s))
@@ -84,19 +83,21 @@ class RungeKuttaFehlberg54:
     def setStepLength(self,stepLength):
         self.h=stepLength        
         
-def F(Y):
-    M=np.array([[0.49119653, 0.32513304, 0.98057799],
-                [0.20768544, 0.97699416, 0.18220559],
-                [0.96407071, 0.18373237, 0.95307793]])
-    res=np.ones(4)               
-    res[1:4]=M.dot(Y[1:4])
+def F(Y, length):
+    res=np.ones(length)
+    res[1] = Y[1]+Y[2]
+    res[2] = -Y[1]+Y[2]
+    # M=np.array([[0.49119653, 0.32513304, 0.98057799],
+    #             [0.20768544, 0.97699416, 0.18220559],
+    #             [0.96407071, 0.18373237, 0.95307793]])
+    # res[1:length]=M.dot(Y[1:length])
     return res
 
 def main():
-    W  =np.array([0,1,1,1])
+    W  =np.array([0, 1, 0,0])
     h=0.1
     tol=05e-14
-    tEnd=2.0
+    tEnd=1.0
     rkf54 = RungeKuttaFehlberg54(F,4,h,tol)
 
     while(W[0]<tEnd):
