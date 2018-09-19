@@ -1,6 +1,7 @@
 
 from numpy import sqrt
 import time
+import RungeKuttaFehlberg
 
 import numpy as np
 import scipy.integrate as integrate
@@ -19,20 +20,20 @@ class Orbit:
     and t0 is the initial time
     """
     def __init__(self,
-                 init_state = [0, 0, 1, 2, 0],
-                 G=1,
-                 m1=1,
-                 m2=3): 
+                 init_state,
+                 G= 6.67408*10**(-11),
+                 m1=7.34767309*10**22,
+                 m2=5.972 * 10**24):
         self.GravConst = G
-        self.mPlanet = m1
-        self.mSol = m2
+        self.mMoon = m1
+        self.mEarth = m2
         self.state = np.asarray(init_state, dtype='float')
     
-    def position(self):
+    def position(self, i):
         """compute the current x,y positions of the pendulum arms"""
-        x = self.state[1]
-        y = self.state[3]
-        return (x, y)
+        x1 = self.state[i][1]
+        y1 = self.state[i][3]
+        return (x1, y1)
     
     def energy(self):
         x = self.state[1]
@@ -47,16 +48,11 @@ class Orbit:
         return K+U
 
     def time_elapsed(self):
-        return self.state[0]
+        return self.state[0][0]
 
     def step(self, h):
         """Uses the trapes method to calculate the new state after h seconds."""
-        x=self.state
-        sx1=self.ydot(x)
-        sx2=self.ydot(x+h*1/4*sx1)
-        sx3=self.ydot(x+h*3/32*sx1 + h*9/32*sx2)
-        sx4=self.ydot(x + 2)
-        self.state=x+h*(sx1+sx2)/2
+        RKF54 = RungeKuttaFehlberg.RungeKuttaFehlberg54()
 
     def ydot(self,x):
         G=self.GravConst
