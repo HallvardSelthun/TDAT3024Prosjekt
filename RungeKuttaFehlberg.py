@@ -45,8 +45,7 @@ class RungeKuttaFehlberg54:
         E=np.linalg.norm(Wout-Zout,2)/np.linalg.norm(Wout,2)
         return Wout, E
 
-    def safeStep(self,
-                 Win):
+    def safeStep(self, Win):
         Wout,E = self.step(Win)
         # Check if the error is tolerable
         if(not self.isErrorTolerated(E)):
@@ -84,17 +83,32 @@ class RungeKuttaFehlberg54:
         self.h=stepLength        
         
 def F(Y, length):
-    res=np.ones(length)
-    res[1] = Y[1]+Y[2]
-    res[2] = -Y[1]+Y[2]
-    # M=np.array([[0.49119653, 0.32513304, 0.98057799],
-    #             [0.20768544, 0.97699416, 0.18220559],
-    #             [0.96407071, 0.18373237, 0.95307793]])
-    # res[1:length]=M.dot(Y[1:length])
+
+    # Hva gjør man med fart- og posisjonsvektor?
+    res[1,1] = Y[1,1]
+    res[1,0] = Y[1,0]
+    res[0,1] = Y[0,1]
+    res[0,0] = Y[0,0]
+
+
+    return res
+
+def F_a(Y):
+    # Konstanter (bør flyttes):
+    G = 6.67408 * 10 ** (11)
+    M_e = 5.972 * 10 ** 24
+    # Bevegelseslikninger for jorda og månen.
+    # Y-vektor på formen [[sx,sy][vx,vy][ax,ay]]
+    # Må vi ha med t i Y-vektoren?
+    res = np.ones(2)
+
+    res[0] = G * M_e / np.sqrt(Y[0, 0] ** 2 + Y[0, 1] ** 2) ** 3 * Y[0, 0]
+    res[1] = G * M_e / (np.sqrt(Y[0] ** 2 + Y[0, 1] ** 2)) ** 3 * Y[0, 1]
+
     return res
 
 def main():
-    W  =np.array([0, 1, 0,0])
+    W  =np.array([0, 0, 0, 0])
     h=0.1
     tol=05e-14
     tEnd=1.0

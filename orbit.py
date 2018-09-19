@@ -43,7 +43,7 @@ class Orbit:
         m2 = self.mSol
         G = self.GravConst
         U=-G*m1*m2/sqrt(x**2+y**2)
-        K= m1*(vx**2+vy**2)/2
+        K = m1*(vx**2+vy**2)/2
         return K+U
 
     def time_elapsed(self):
