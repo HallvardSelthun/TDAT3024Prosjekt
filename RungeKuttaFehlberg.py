@@ -45,8 +45,7 @@ class RungeKuttaFehlberg54:
         E=np.linalg.norm(Wout-Zout,2)/np.linalg.norm(Wout,2)
         return Wout, E
 
-    def safeStep(self,
-                 Win):
+    def safeStep(self, Win):
         Wout,E = self.step(Win)
         # Check if the error is tolerable
         if(not self.isErrorTolerated(E)):
@@ -108,9 +107,8 @@ def F_a(Y):
 
     return res
 
-
 def main():
-    W  =np.array([0, 1, 0,0])
+    W  =np.array([0, 0, 0, 0])
     h=0.1
     tol=05e-14
     tEnd=1.0
