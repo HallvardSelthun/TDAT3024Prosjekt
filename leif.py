@@ -9,6 +9,11 @@ import matplotlib.animation as animation
 
 
 class Orbit:
+    GravConstant = 6.67408 * 10 ** (11)
+
+    M_e = 5.972 * 10 ** 24
+    M_m =7.34767309*10**22
+
     """
 
     Orbit Class
@@ -21,14 +26,13 @@ class Orbit:
 
     def __init__(self,
                  init_state,
-                 G=1.0,
-                 m1=1.0,
-                 m2=1.0,
-                 m3=1.0):
+                 G = GravConstant,
+                 m1=M_e,
+                 m2=M_m,
+                 ):
         self.GravConst = G
         self.mPlanet1 = m1
         self.mPlanet2 = m2
-        self.mPlanet3 = m3
         self.state = np.asarray(init_state, dtype='float')
         # self.state2 = np.asarray(init_state2, dtype='float')
         # self.state3 = np.asarray(init_state3, dtype='float')
@@ -57,66 +61,53 @@ class Orbit:
 
     def step(self, h):
         """Uses the trapes method to calculate the new state after h seconds."""
-        for i in range(3):
+        for i in range(2):
             x = self.state[i]
             s1 = self.ydot(x,i)
             s2 = self.ydot(x + h * s1,i)
             self.state[i] = x + h * (s1 + s2) / 2
 
     def ydot(self, x,i):
-        G = self.GravConst
         if i == 0:
             m2 = self.mPlanet2
             px2 = self.state[1][1]
             py2 = self.state[1][3]
-            m3 = self.mPlanet3
-            px3 = self.state[2][1]
-            py3 = self.state[2][3]
-        elif i==1:
+
+        elif i == 1:
             m2 = self.mPlanet1
             px2 = self.state[0][1]
             py2 = self.state[0][3]
-            m3 = self.mPlanet3
-            px3= self.state[2][1]
-            py3= self.state[2][3]
-        else:
-            m2 = self.mPlanet1
-            px2 = self.state[0][1]
-            py2 = self.state[0][3]
-            m3 = self.mPlanet2
-            px3 = self.state[1][1]
-            py3 = self.state[1][3]
+        else :
+            print("Feil i indeks fra state")
+            exit(-1)
         px1 = x[1]
         py1 = x[3]
         vx1 = x[2]
         vy1 = x[4]
-        dist1 = ((px2 - px1) ** 2 + (py2 - py1) ** 2)** (3/2)
-        dist2 = ((px3 - px1) ** 2 + (py3 - py1) ** 2)** (3/2)
         z = np.zeros(5)
         z[0] = 1
         z[1] = vx1
-        z[2] = (G*m2*(px2-px1)/dist1)+(G*m3*(px3-px1)/dist2)
+        z[2] = self.G * m2 / np.sqrt(px2 ** 2 + py2 ** 2) ** 3 *px2
+        #  z[2] = (G*m2*(px2-px1)/dist1)+(G*m3*(px3-px1)/dist2)
         z[3] = vy1
-        z[4] = (G*m2*(py2-py1)/dist1)+(G*m3*(py3-py1)/dist2)
+        z[4] = self.G * m2 / (np.sqrt(px2 ** 2 + py2 ** 2)) ** 3 * py2
+        #  z[4] = (G*m2*(py2-py1)/dist1)+(G*m3*(py3-py1)/dist2)
         return z
 
 
 # make an Orbit instance
 #init_state is [t0,x0,vx0,y0,vx0],
-orbit = Orbit([[0.0, -0.970, -0.466, 0.243, -0.433],
-               [0.0, 0.970, -0.466, -0.243, -0.433],
-               [0.0, 0.0, -2*(-0.466), 0.0,-2*(-0.433)]],
-              1,1,1,1)
+orbit = Orbit([[0.0,0, 0, 0, 0],
+               [0.0, 362600000, 0, 0, 1000]])
 dt = 1. / 30  # 30 frames per second
 
 # The figure is set
 fig = plot.figure()
 axes = fig.add_subplot(111, aspect='equal', autoscale_on=False,
-                       xlim=(-2, 2), ylim=(-2, 2))
+                       xlim=(-2*10**8, 2*10**8), ylim=(-2*10**8, 2*10**8))
 
 lineA, = axes.plot([], [], 'o-g', lw=2)  # A green planet
 lineB, = axes.plot([], [], 'o-b', lw=2)  # A blue planetgreen
-lineC, = axes.plot([], [], 'o-r', lw=2)  # A red planet
 
 # line2, = axes.plot([], [], 'o-y', lw=2)  # A yellow sun
 time_text = axes.text(0.02, 0.95, '', transform=axes.transAxes)
@@ -127,25 +118,24 @@ def init():
     """initialize animation"""
     lineA.set_data([], [])
     lineB.set_data([], [])
-    lineC.set_data([], [])
     # line2.set_data([], [])
     time_text.set_text('')
     energy_text.set_text('')
-    return lineA,lineB, lineC, time_text, energy_text
+    return lineA, lineB, time_text, energy_text
 
 
 def animate(i):
     """perform animation step"""
     global orbit, dt
-    orbit.step(dt)
+    for i in range(100):
+        orbit.step(dt)
     lineA.set_data(*orbit.position(0))
     lineB.set_data(*orbit.position(1))
-    lineC.set_data(*orbit.position(2))
 
     # line2.set_data([0.0, 0.0])
     time_text.set_text('time = %.1f' % orbit.time_elapsed())
     # energy_text.set_text('energy = %.3f J' % orbit.energy())
-    return lineA, lineB,lineC, time_text, energy_text
+    return lineA, lineB, time_text, energy_text
 
 
 # choose the interval based on dt and the time to animate one step

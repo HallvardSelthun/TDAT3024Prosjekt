@@ -83,7 +83,7 @@ class RungeKuttaFehlberg54:
         self.h=stepLength        
         
 def F(Y, length):
-
+    res = [[]]
     # Hva gjør man med fart- og posisjonsvektor?
     res[1,1] = Y[1,1]
     res[1,0] = Y[1,0]
@@ -103,7 +103,7 @@ def F_a(Y):
     res = np.ones(2)
 
     res[0] = G * M_e / np.sqrt(Y[0, 0] ** 2 + Y[0, 1] ** 2) ** 3 * Y[0, 0]
-    res[1] = G * M_e / (np.sqrt(Y[0] ** 2 + Y[0, 1] ** 2)) ** 3 * Y[0, 1]
+    res[1] = G * M_e / (np.sqrt(Y[0, 0] ** 2 + Y[0, 1] ** 2)) ** 3 * Y[0, 1]
 
     return res
 
