@@ -52,10 +52,12 @@ class Orbit:
     def step(self, h):
         """Uses the trapes method to calculate the new state after h seconds."""
         x=self.state
-        s1=self.ydot(x)
-        s2=self.ydot(x+h*s1)
-        self.state=x+h*(s1+s2)/2
-    
+        sx1=self.ydot(x)
+        sx2=self.ydot(x+h*1/4*sx1)
+        sx3=self.ydot(x+h*3/32*sx1 + h*9/32*sx2)
+        sx4=self.ydot(x + 2)
+        self.state=x+h*(sx1+sx2)/2
+
     def ydot(self,x):
         G=self.GravConst
         m2=self.mSol
