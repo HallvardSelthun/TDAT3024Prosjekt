@@ -9,11 +9,11 @@ import matplotlib.animation as animation
 
 
 class Orbit:
-    GravConstant = 6.67408 * 10 ** (11)
+    GravConstant = 6.67408 * 10 ** (-11)
     M_e = 5.972 * 10 ** 24
     M_m =7.34767309*10**22
-    h=0.01
-    tol= 05e-12
+    h=0.1
+    tol= 05e-14
 
 
     """
@@ -36,8 +36,10 @@ class Orbit:
         self.mPlanet1 = m1
         self.mPlanet2 = m2
         self.state = np.asarray(init_state, dtype='float')
-        self.rkf54jorda = RKF.RungeKuttaFehlberg54(self.ydot, len(self.state[0]), self.h, self.tol)
-        self.rkf54månen = RKF.RungeKuttaFehlberg54(self.ydot, len(self.state[1]), self.h, self.tol)
+        h1= self.h
+        h2=self.h
+        self.rkf54jorda = RKF.RungeKuttaFehlberg54(self.ydot, len(self.state[0]), h1, self.tol)
+        self.rkf54månen = RKF.RungeKuttaFehlberg54(self.ydot, len(self.state[1]), h2, self.tol)
 
 
     def position(self, i):
@@ -59,15 +61,14 @@ class Orbit:
     #     return K + U
 
     def time_elapsed(self):
-        return self.state[0][0]
+        return self.state[0][0], self.state[1][0]
 
-    def step(self):
-        """Uses the trapes method to calculate the new state after h seconds."""
-        w0 = self.state[0] #jorda
-        w1 = self.state[1] #månen
-
-        w0, E0 = self.rkf54jorda.safeStep(w0, 0)
-        w1, E1 = self.rkf54månen.safeStep(w1, 1)
+    def step(self, i):
+        w0 = self.state[i]
+        if i ==0:
+            self.state[i], E0 = self.rkf54jorda.safeStep(w0, i)
+        else:
+            self.state[i], E0 = self.rkf54månen.safeStep(w0, i)
 
     def ydot(self, x,i,h):
         if i == 0:
@@ -88,26 +89,27 @@ class Orbit:
         vx1 = x[2]
         vy1 = x[4]
         z = np.zeros(5)
-        z[0] = x[0]+h
+        dist = np.sqrt((px2-px1)**2 + (py2-py1)**2)
+        z[0] = 1 #x[0] + h
         z[1] = vx1
-        z[2] = (self.GravConst * m2 * (px2-px1))/(((px2-px1)**2 + (py2-py1)**2)**3/2)
+        z[2] = (self.GravConst * m2 * (px2-px1))/(dist**3)
         # z[2] = self.GravConst * m2 / np.sqrt(px2 ** 2 + py2 ** 2) ** 3 *px2
         z[3] = vy1
-        z[4] = (self.GravConst * m2 * (py2-py1))/(((px2-px1)**2 + (py2-py1)**2)**3/2)
+        z[4] = (self.GravConst * m2 * (py2-py1))/(dist**3)
         # z[4] = self.GravConst * m2 / (np.sqrt(px2 ** 2 + py2 ** 2)) ** 3 * py2
         return z
 
 
 # make an Orbit instance
 #init_state is [t0,x0,vx0,y0,vx0],
-orbit = Orbit([[0.0,0, 0, 0, 0],
-               [0.0, 3.6*10**8, 0, 0, 1000]])
-dt = 1. / 1 # 30 frames per second
+orbit = Orbit([[0,0, 0, 0, 0],
+               [0.0, 254558441, -707, 254558441, 707]])
+dt = 1. / 20 # 30 frames per second
 
 # The figure is set
 fig = plot.figure()
 axes = fig.add_subplot(111, aspect='equal', autoscale_on=False,
-                       xlim=(-1*10**9, 1*10**9), ylim=(-1*10**9, 1*10**9))
+                       xlim=(-0.5*10**9, 0.5*10**9), ylim=(-0.5*10**9, 0.5*10**9))
 
 lineA, = axes.plot([], [], 'o-b', lw=4*10**6)  # A blue planet
 lineB, = axes.plot([], [], 'o-r', lw=2*10**6)  # A white planet
@@ -130,16 +132,19 @@ def init():
 def animate(i):
     """perform animation step"""
     global orbit, dt
-    for i in range(600):
-        orbit.step()
+
+    t0 = orbit.state[0][0]
+    while (orbit.state[1][0] < t0 + 8640):
+        orbit.step(1)
+    while (orbit.state[0][0] < t0 + 8640):
+        orbit.step(0)
+    # if orbit.state[0][0] > 2629743 and orbit.state[1][0]>2629743 :
+
     lineA.set_data(*orbit.position(0))
     lineB.set_data(*orbit.position(1))
-    print()
-    # print(orbit.state)
-    if orbit.state[0][0] > 2629744:
-        exit(1)
     # line2.set_data([0.0, 0.0])
-    time_text.set_text('time = %.1f' % orbit.time_elapsed())
+    t1, t2 = orbit.time_elapsed()
+    time_text.set_text('time = '  +str(t1)+', '+str(t2))
     # energy_text.set_text('energy = %.3f J' % orbit.energy())
     return lineA, lineB, time_text, energy_text
 
@@ -152,14 +157,14 @@ t1 = time.time()
 
 delay = 2000 * dt - (t1 - t0)
 
-anim=animation.FuncAnimation(fig,        # figure to plot in
-                        animate,    # function that is called on each frame
-                        frames=1000, # total number of frames
-                        interval=delay, # time to wait between each frame.
-                        repeat=False,
-                        blit=True,
-                        init_func=init # initialization
-                        )
+anim = animation.FuncAnimation(fig,  # figure to plot in
+                               animate,  # function that is called on each frame
+                               frames=300,  # total number of frames
+                               interval=delay,  # time to wait between each frame.
+                               repeat=False,
+                               blit=True,
+                               init_func=init  # initialization
+                               )
 
 # save the animation as an mp4.  This requires ffmpeg or mencoder to be
 # installed.  The extra_args ensure that the x264 codec is used, so that

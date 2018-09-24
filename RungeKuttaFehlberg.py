@@ -35,7 +35,7 @@ class RungeKuttaFehlberg54:
     
     def step(self, Win,c):
         s=np.zeros((6, self.dim))
-        
+
         for i in range(0,6):
             s[i,:]=self.F(Win+self.h*self.A[i,0:i].dot(s[0:i,:]), c, self.h)
 
@@ -46,16 +46,30 @@ class RungeKuttaFehlberg54:
         return Wout, E
 
     def safeStep(self, Win, i):
+        if self.h >= 100:
+            self.h = 100
+            Wout, E = self.step(Win, i)
+            return Wout, E
+
         Wout,E = self.step(Win, i)
         # Check if the error is tolerable
         if(not self.isErrorTolerated(E)):
             #Try to adjust the optimal step length
             self.adjustStep(E)
             Wout,E = self.step(Win, i)
+            if self.h<= 0.0001:
+                self.h=0.0001
+                print("LKAJSKBFNLSDBHJSF")
+                Wout, E = self.step(Win, i)
+                return Wout, E
         # If the error is still not tolerable
         counter=0
         while(not self.isErrorTolerated(E)):
-            #Try if dividing the steplength with 2 helps. 
+            #Try if dividing the steplength with 2 helps.
+            if self.h<= 0.0001:
+                self.h=0.0001
+                Wout, E = self.step(Win, i)
+                return Wout, E
             self.divideStepByTwo()
             Wout,E = self.step(Win, i)
             counter = counter + 1
@@ -63,8 +77,8 @@ class RungeKuttaFehlberg54:
                 sys.exit(-1)
             
         self.adjustStep(E)
-        print(self.h)
-        
+       # Wout[0] = Win[0] + self.h
+
         return Wout, E
 
     def isErrorTolerated(self,E):
@@ -83,46 +97,24 @@ class RungeKuttaFehlberg54:
     def setStepLength(self,stepLength):
         self.h=stepLength        
         
-def F(Y, length):
-    res = [[]]
-    # Hva gjør man med fart- og posisjonsvektor?
-    res[1,1] = Y[1,1]
-    res[1,0] = Y[1,0]
-    res[0,1] = Y[0,1]
-    res[0,0] = Y[0,0]
 
 
-    return res
 
-def F_a(Y):
-    # Konstanter (bør flyttes):
-    G = 6.67408 * 10 ** (11)
-    M_e = 5.972 * 10 ** 24
-    # Bevegelseslikninger for jorda og månen.
-    # Y-vektor på formen [[sx,sy][vx,vy][ax,ay]]
-    # Må vi ha med t i Y-vektoren?
-    res = np.ones(2)
-
-    res[0] = G * M_e / np.sqrt(Y[0, 0] ** 2 + Y[0, 1] ** 2) ** 3 * Y[0, 0]
-    res[1] = G * M_e / (np.sqrt(Y[0, 0] ** 2 + Y[0, 1] ** 2)) ** 3 * Y[0, 1]
-
-    return res
-
-def main():
-    W  =np.array([0, 0, 0, 0])
-    h=0.1
-    tol=05e-14
-    tEnd=1.0
-    rkf54 = RungeKuttaFehlberg54(F,4,h,tol)
-
-    while(W[0]<tEnd):
-        W , E = rkf54.safeStep(W)
-        
-    rkf54.setStepLength(tEnd-W[0])
-    W,E = rkf54.step(W)
-
-    print(W,E)
-    
-if __name__ == "__main__":
-    # execute only if run as a script
-    main()
+# def main():
+    # W  =np.array([0, 0, 0, 0])
+    # h=0.1
+    # tol=05e-14
+    # tEnd=1.0
+    # rkf54 = RungeKuttaFehlberg54(F,4,h,tol)
+    #
+    # while(W[0]<tEnd):
+    #     W , E = rkf54.safeStep(W)
+    #
+    # rkf54.setStepLength(tEnd-W[0])
+    # W,E = rkf54.step(W)
+    #
+    # print(W,E)
+#
+# if __name__ == "__main__":
+#     # execute only if run as a script
+#     main()
