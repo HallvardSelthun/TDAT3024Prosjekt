@@ -33,11 +33,11 @@ class RungeKuttaFehlberg54:
         self.h=stepsize
         self.tol=tolerance
     
-    def step(self, Win):
+    def step(self, Win,c):
         s=np.zeros((6, self.dim))
         
         for i in range(0,6):
-            s[i,:]=self.F(Win+self.h*self.A[i,0:i].dot(s[0:i,:]), len(Win))
+            s[i,:]=self.F(Win+self.h*self.A[i,0:i].dot(s[0:i,:]), c, self.h)
 
         Zout=Win+self.h*(self.B[0,:].dot(s))
         Wout=Win+self.h*(self.B[1,:].dot(s))
@@ -45,24 +45,25 @@ class RungeKuttaFehlberg54:
         E=np.linalg.norm(Wout-Zout,2)/np.linalg.norm(Wout,2)
         return Wout, E
 
-    def safeStep(self, Win):
-        Wout,E = self.step(Win)
+    def safeStep(self, Win, i):
+        Wout,E = self.step(Win, i)
         # Check if the error is tolerable
         if(not self.isErrorTolerated(E)):
             #Try to adjust the optimal step length
             self.adjustStep(E)
-            Wout,E = self.step(Win)
+            Wout,E = self.step(Win, i)
         # If the error is still not tolerable
         counter=0
         while(not self.isErrorTolerated(E)):
             #Try if dividing the steplength with 2 helps. 
             self.divideStepByTwo()
-            Wout,E = self.step(Win)
+            Wout,E = self.step(Win, i)
             counter = counter + 1
             if(counter>10):
                 sys.exit(-1)
             
         self.adjustStep(E)
+        print(self.h)
         
         return Wout, E
 

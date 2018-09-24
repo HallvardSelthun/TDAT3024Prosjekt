@@ -1,6 +1,6 @@
 from numpy import sqrt
 import time
-
+import RungeKuttaFehlberg as RKF
 import numpy as np
 import scipy.integrate as integrate
 
@@ -10,9 +10,11 @@ import matplotlib.animation as animation
 
 class Orbit:
     GravConstant = 6.67408 * 10 ** (11)
-
     M_e = 5.972 * 10 ** 24
     M_m =7.34767309*10**22
+    h=0.01
+    tol= 05e-12
+
 
     """
 
@@ -34,8 +36,8 @@ class Orbit:
         self.mPlanet1 = m1
         self.mPlanet2 = m2
         self.state = np.asarray(init_state, dtype='float')
-        # self.state2 = np.asarray(init_state2, dtype='float')
-        # self.state3 = np.asarray(init_state3, dtype='float')
+        self.rkf54jorda = RKF.RungeKuttaFehlberg54(self.ydot, len(self.state[0]), self.h, self.tol)
+        self.rkf54månen = RKF.RungeKuttaFehlberg54(self.ydot, len(self.state[1]), self.h, self.tol)
 
 
     def position(self, i):
@@ -59,15 +61,15 @@ class Orbit:
     def time_elapsed(self):
         return self.state[0][0]
 
-    def step(self, h):
+    def step(self):
         """Uses the trapes method to calculate the new state after h seconds."""
-        for i in range(2):
-            x = self.state[i]
-            s1 = self.ydot(x,i)
-            s2 = self.ydot(x + h * s1,i)
-            self.state[i] = x + h * (s1 + s2) / 2
+        w0 = self.state[0] #jorda
+        w1 = self.state[1] #månen
 
-    def ydot(self, x,i):
+        w0, E0 = self.rkf54jorda.safeStep(w0, 0)
+        w1, E1 = self.rkf54månen.safeStep(w1, 1)
+
+    def ydot(self, x,i,h):
         if i == 0:
             m2 = self.mPlanet2
             px2 = self.state[1][1]
@@ -80,34 +82,35 @@ class Orbit:
         else :
             print("Feil i indeks fra state")
             exit(-1)
+
         px1 = x[1]
         py1 = x[3]
         vx1 = x[2]
         vy1 = x[4]
         z = np.zeros(5)
-        z[0] = 1
+        z[0] = x[0]+h
         z[1] = vx1
-        z[2] = self.G * m2 / np.sqrt(px2 ** 2 + py2 ** 2) ** 3 *px2
-        #  z[2] = (G*m2*(px2-px1)/dist1)+(G*m3*(px3-px1)/dist2)
+        z[2] = (self.GravConst * m2 * (px2-px1))/(((px2-px1)**2 + (py2-py1)**2)**3/2)
+        # z[2] = self.GravConst * m2 / np.sqrt(px2 ** 2 + py2 ** 2) ** 3 *px2
         z[3] = vy1
-        z[4] = self.G * m2 / (np.sqrt(px2 ** 2 + py2 ** 2)) ** 3 * py2
-        #  z[4] = (G*m2*(py2-py1)/dist1)+(G*m3*(py3-py1)/dist2)
+        z[4] = (self.GravConst * m2 * (py2-py1))/(((px2-px1)**2 + (py2-py1)**2)**3/2)
+        # z[4] = self.GravConst * m2 / (np.sqrt(px2 ** 2 + py2 ** 2)) ** 3 * py2
         return z
 
 
 # make an Orbit instance
 #init_state is [t0,x0,vx0,y0,vx0],
 orbit = Orbit([[0.0,0, 0, 0, 0],
-               [0.0, 362600000, 0, 0, 1000]])
-dt = 1. / 30  # 30 frames per second
+               [0.0, 3.6*10**8, 0, 0, 1000]])
+dt = 1. / 1 # 30 frames per second
 
 # The figure is set
 fig = plot.figure()
 axes = fig.add_subplot(111, aspect='equal', autoscale_on=False,
-                       xlim=(-2*10**8, 2*10**8), ylim=(-2*10**8, 2*10**8))
+                       xlim=(-1*10**9, 1*10**9), ylim=(-1*10**9, 1*10**9))
 
-lineA, = axes.plot([], [], 'o-g', lw=2)  # A green planet
-lineB, = axes.plot([], [], 'o-b', lw=2)  # A blue planetgreen
+lineA, = axes.plot([], [], 'o-b', lw=4*10**6)  # A blue planet
+lineB, = axes.plot([], [], 'o-r', lw=2*10**6)  # A white planet
 
 # line2, = axes.plot([], [], 'o-y', lw=2)  # A yellow sun
 time_text = axes.text(0.02, 0.95, '', transform=axes.transAxes)
@@ -127,11 +130,14 @@ def init():
 def animate(i):
     """perform animation step"""
     global orbit, dt
-    for i in range(100):
-        orbit.step(dt)
+    for i in range(600):
+        orbit.step()
     lineA.set_data(*orbit.position(0))
     lineB.set_data(*orbit.position(1))
-
+    print()
+    # print(orbit.state)
+    if orbit.state[0][0] > 2629744:
+        exit(1)
     # line2.set_data([0.0, 0.0])
     time_text.set_text('time = %.1f' % orbit.time_elapsed())
     # energy_text.set_text('energy = %.3f J' % orbit.energy())
@@ -145,5 +151,21 @@ animate(0)
 t1 = time.time()
 
 delay = 2000 * dt - (t1 - t0)
+
+anim=animation.FuncAnimation(fig,        # figure to plot in
+                        animate,    # function that is called on each frame
+                        frames=1000, # total number of frames
+                        interval=delay, # time to wait between each frame.
+                        repeat=False,
+                        blit=True,
+                        init_func=init # initialization
+                        )
+
+# save the animation as an mp4.  This requires ffmpeg or mencoder to be
+# installed.  The extra_args ensure that the x264 codec is used, so that
+# the video can be embedded in html5.  You may need to adjust this for
+# your system: for more information, see
+# http://matplotlib.sourceforge.net/api/animation_api.html
+anim.save('orbit.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
 
 plot.show()
