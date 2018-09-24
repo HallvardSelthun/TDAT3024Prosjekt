@@ -30,7 +30,7 @@ skyvekraft_del_3 = 1000000
 brenntid_del_3 = 500
 
 # Beregnede konstanter for del 3
-vekttap_del_2 = vekt_del_3 - tom_vekt_del_3
+vekttap_del_3 = vekt_del_3 - tom_vekt_del_3
 masseendring_per_sek_del_3 = vekttap_del_3/brenntid_del_3
 eksoshastighet_del_3 = skyvekraft_del_3/masseendring_per_sek_del_3
 
@@ -46,28 +46,41 @@ starttid_del_3 = brenntid_del_1 + brenntid_del_2
 sluttid = brenntid_del_1 + brenntid_del_2 + brenntid_del_3
 
 
+# Funksjon som returnerer 0-4 basert på hvilken forbrenningsperiode raketten befinner seg i
+def periode(tid):
+    if (tid<starttid_del_1):
+        return 0
+    elif(tid<=starttid_del_2):
+        return 1
+    elif(tid<=starttid_del_3):
+        return 2
+    elif(tid<=sluttid):
+        return 3
+    else:
+        return 4
+
 # Rakettens totale masse t sekunder etter oppskytning
 def masse(tid):
-    if(tid<starttid_del_1):
+    if(periode(tid)==0):
         return total_vekt_del_1
-    elif(tid<=starttid_del_2):
+    elif(periode(tid)==1):
         return total_vekt_del_1 - masseendring_per_sek_del_1*(tid - starttid_del_1)
-    elif(tid<=starttid_del_3):
+    elif(periode(tid)==2):
         return total_vekt_del_2 - masseendring_per_sek_del_2*(tid - starttid_del_2)
-    elif(tid<=sluttid):
+    elif(periode(tid)==3):
         return total_vekt_del_3 - masseendring_per_sek_del_3*(tid-starttid_del_3)
     else:
         return tom_vekt_del_3
 
 
 def skyvekraft(tid):
-    if (tid < starttid_del_1):
+    if (periode(tid)==0):
         return 0
-    elif (tid <= starttid_del_2):
+    elif (periode(tid)==1):
         return skyvekraft_del_1
-    elif (tid <= starttid_del_3):
+    elif (periode(tid)==2):
         return skyvekraft_del_2
-    elif (tid <= sluttid):
+    elif (periode(tid)==3):
         return skyvekraft_del_3
     else:
         return 0
