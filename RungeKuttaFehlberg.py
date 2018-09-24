@@ -103,7 +103,7 @@ def F_a(Y):
     res = np.ones(2)
 
     res[0] = G * M_e / np.sqrt(Y[0, 0] ** 2 + Y[0, 1] ** 2) ** 3 * Y[0, 0]
-    res[1] = G * M_e / (np.sqrt(Y[0] ** 2 + Y[0, 1] ** 2)) ** 3 * Y[0, 1]
+    res[1] = G * M_e / (np.sqrt(Y[0, 0] ** 2 + Y[0, 1] ** 2)) ** 3 * Y[0, 1]
 
     return res
 
