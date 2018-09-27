@@ -7,7 +7,7 @@ masse_jord = 5.9736 * 10**24
 G_k = 6.67 * 10**(-11)
 
 
-# Konstanter for luftmotstand TODO: Rakettens C_d kan kanskje bli bedre. Nå er den lik konstanten for en kule
+# Konstanter for luftmotstand TODO: NAvnsett bedre, din pikk Rakettens C_d kan kanskje bli bedre. Nå er den lik konstanten for en kule
 C_d = 1/2
 areal_del_1 = np.pi * 5.55**2
 areal_del_2 = np.pi * 5.55**2
@@ -42,7 +42,10 @@ def temperatur(h):
 # Atmosfærens trykk som funksjon av høyde
 def trykk(h):
     if(atm_lag(h) == 1):
-        return 101290 * (temperatur(h)/288.08)**5.256
+        print("Høyde: "+str(h))
+        temp = 101290 * (temperatur(h)/288.08)**5.256
+        print("Temperatur: "+str(temp))
+        return temp
     elif(atm_lag(h) ==2):
         return 127760 * np.exp(-0.000157*h)
     elif(atm_lag(h) == 3):
@@ -51,13 +54,14 @@ def trykk(h):
         return 0
 
 
-# Atmosfærens tetthet som funksjon av høyde TODO: Uferdig
+# Atmosfærens tetthet som funksjon av høyde
 def tetthet(h):
     return 3.4855*trykk(h)/temperatur(h)
 
 # Luftmotstand som funksjon av rakettens høyde, hastighet og tid etter oppskytning
-def luftmotstand(h, v, t):
+def luftmotstand(h0, v, t):
+    h = (h0 - 6370000)
     if(periode(t) == 0 or periode(t) == 1 or periode(t == 2)):
-        return 0.5 * C_d * tetthet(h) * areal_del_1 * v^2
+        return 0.5 * C_d * tetthet(h) * areal_del_1 * v**2
     else:
-        return 0.5 * C_d * tetthet() * areal_del_3 * v^2
+        return 0.5 * C_d * tetthet(h) * areal_del_3 * v**2

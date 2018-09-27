@@ -76,4 +76,6 @@ fig = plot.figure()
 
 plot.loglog(tolerances, times)
 plot.axis([tolerances[0], tolerances[-1],times[0], times[-1]])
+plot.xlabel("Toleranse")
+plot.ylabel("Modelltid(1) / beregningstid")
 plot.show()
