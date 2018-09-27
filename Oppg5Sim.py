@@ -5,7 +5,6 @@ import numpy as np
 # for Python2
 # from tkinter import *   ## notice capitalized T in Tkinter
 import scipy.integrate as integrate
-
 import matplotlib.pyplot as plot
 import matplotlib.animation as animation
 import oppskytning
@@ -16,7 +15,7 @@ class Orbit:
     GravConstant = 6.67408 * 10 ** (-11)
     M_e = 5.972 * 10 ** 24
     M_m = 7.34767309 * 10 ** 22
-    h = 0.1
+    h = 0.00000001
     tol = 05e-14
     prevPositions = [[0], [384400000]]
 
@@ -83,6 +82,8 @@ class Orbit:
         w0 = self.state
         self.state, E = self.rkf54.safeStep(w0)
 
+
+
     def ydot(self, x):
         mJorda = self.mPlanet1
         mRak = self.mPlanet2
@@ -96,16 +97,17 @@ class Orbit:
         vyR = x[8]
 
         z = np.zeros(9)
-        dist = np.sqrt((pxR - pxJ) ** 2 + (pyR - pyJ) ** 2)
+        # dist = np.sqrt((pxR - pxJ) ** 2 + (pyR - pyJ) ** 2)
         z[0] = 1
         z[1] = 0
         z[2] = 0
         z[3] = 0
         z[4] = 0
-        z[5] = vxR
+        z[5] = 0
         z[6] = 0
         z[7] = vyR
-        z[8] = -oppskytning.tyngdekraft((pyR-pyJ), saturn_v.masse(x[0])) - oppskytning.luftmotstand((pyR-pyJ), vyR, x[0]) + saturn_v.skyvekraft(x[0])
+        z[8] = (-oppskytning.tyngdekraft((pyR-pyJ), saturn_v.masse(x[0])) - oppskytning.luftmotstand((pyR-pyJ), vyR, x[0]) + saturn_v.skyvekraft(x[0]))/oppskytning.masse(x[0])
+        if(x[0]%1<0.01):print(x[0], oppskytning.tyngdekraft((pyR-pyJ), saturn_v.masse(x[0]))/saturn_v.masse(x[0]),oppskytning.luftmotstand((pyR-pyJ), vyR, x[0])/saturn_v.masse(x[0]), saturn_v.skyvekraft(x[0])/saturn_v.masse(x[0]))
         return z
 
 
