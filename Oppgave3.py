@@ -143,6 +143,7 @@ def animate(i):
     t0 = orbit.state[0]
     while orbit.state[0] < t0 + secondsPerFrame:
         orbit.step()
+
     posJ, posM = orbit.position()
     x = posM[0]
     y = posM[1]

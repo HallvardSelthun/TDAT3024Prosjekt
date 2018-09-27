@@ -37,7 +37,6 @@ class Orbit:
                  ):
         self.GravConst = G
         self.mPlanet1 = m1
-        self.mPlanet2 = m2
         self.state = np.asarray(init_state, dtype='float')
         self.rkf54 = RKF.RungeKuttaFehlberg54(self.ydot, len(self.state), self.h, self.tol)
         self.prevPositions = self.prevPositions
@@ -57,23 +56,22 @@ class Orbit:
         y2 = self.state[7]
         return (x1, y1), (x2, y2)
 
-    def energy(self):
-        pxJ = self.state[1]
-        vxJ = self.state[2]
-        pyJ = self.state[3]
-        vyJ = self.state[4]
-        pxM = self.state[5]
-        vxM = self.state[6]
-        pyM = self.state[7]
-        vyM = self.state[8]
-        mJorda = self.mPlanet1
-        mManen = self.mPlanet2
-        G = self.GravConst
-        dist = np.sqrt((pxM - pxJ) ** 2 + (pyM - pyJ) ** 2)
-        uTot = -G * mJorda * mManen / dist
-        kJorda = mJorda * (vxJ ** 2 + vyJ ** 2) / 2
-        kManen = mManen * (vxM **2 + vyM**2)/2
-        return (kJorda + uTot + kManen )/(10**24)
+    # def energy(self):
+    #     pxJ = self.state[1]
+    #     vxJ = self.state[2]
+    #     pyJ = self.state[3]
+    #     vyJ = self.state[4]
+    #     pxM = self.state[5]
+    #     vxM = self.state[6]
+    #     pyM = self.state[7]
+    #     vyM = self.state[8]
+    #     mJorda = self.mPlanet1
+    #     G = self.GravConst
+    #     dist = np.sqrt((pxM - pxJ) ** 2 + (pyM - pyJ) ** 2)
+    #     uTot = -G * mJorda * mManen / dist
+    #     kJorda = mJorda * (vxJ ** 2 + vyJ ** 2) / 2
+    #     kManen = mManen * (vxM **2 + vyM**2)/2
+    #     return (kJorda + uTot + kManen )/(10**24)
 
     def time_elapsed(self):
         return self.state[0]
@@ -82,11 +80,8 @@ class Orbit:
         w0 = self.state
         self.state, E = self.rkf54.safeStep(w0)
 
-
-
     def ydot(self, x):
         mJorda = self.mPlanet1
-        mRak = self.mPlanet2
         pxJ = x[1]
         vxJ = x[2]
         pyJ = x[3]
@@ -118,8 +113,8 @@ dt = 1. / 30  # 30 frames per second
 
 # The figure is set
 fig = plot.figure()
-axes = fig.add_subplot(111, aspect='equal', autoscale_on=False,
-                       xlim=(-0.5 * 10 ** 9, 0.5 * 10 ** 9), ylim=(-0.5 * 10 ** 9, 0.5 * 10 ** 9))
+axes = fig.add_subplot(111, aspect='auto', autoscale_on=False,
+                       xlim=(-30000,30000), ylim=(6371000,6371000+210000))
 
 trail, = axes.plot([], [], 'r--', lw=0.5)
 lineA, = axes.plot([], [], 'o-b', lw=60, ms=12)  # A blue planet 6*10**6
@@ -143,22 +138,27 @@ def init():
 def animate(i):
     """perform animation step"""
     global orbit, dt
-    secondsPerFrame = 100 * 24 / 30
+    secondsPerFrame = 0.66
     t0 = orbit.state[0]
     while orbit.state[0] < t0 + secondsPerFrame:
         orbit.step()
-    posJ, posM = orbit.position()
-    x = posM[0]
-    y = posM[1]
+        print(orbit.state)
+    print("Fart: {}".format(orbit.state[8]))
+    posJ, posR = orbit.position()
+    # print(orbit.state)
+    # print(orbit.rkf54.h)
+    x = posR[0]
+    y = posR[1]
+    height = posR[1]-6371010
     orbit.addPos(x, y)
     trail.set_data(orbit.getPos())
     lineA.set_data(*posJ)
-    lineB.set_data(*posM)
+    lineB.set_data(*posR)
     t1 = orbit.time_elapsed()
-    antallDager = t1 / (24 * 3600)
 
-    time_text.set_text('time %.3f Days' % antallDager)
-    energy_text.set_text('energy = %.5f YJ' % orbit.energy())
+
+    time_text.set_text('time %.3f S' % t1)
+    energy_text.set_text('Height = %.5f m' % height)
     return lineA, lineB, time_text, energy_text
 
 
