@@ -46,10 +46,6 @@ class RungeKuttaFehlberg54:
         return Wout, E
 
     def safeStep(self, Win):
-        if self.h >= 100:
-            self.h = 100
-            Wout, E = self.step(Win)
-            return Wout, E
 
         Wout,E = self.step(Win)
         # Check if the error is tolerable
@@ -57,17 +53,19 @@ class RungeKuttaFehlberg54:
             #Try to adjust the optimal step length
             self.adjustStep(E)
             Wout,E = self.step(Win)
-            if self.h<= 0.0001:
-                self.h=0.0001
+            if self.h<= 2*10**-6:
+                self.h= 2*10**-6
+                print("Break1")
                 Wout, E = self.step(Win)
                 return Wout, E
         # If the error is still not tolerable
         counter=0
         while(not self.isErrorTolerated(E)):
             #Try if dividing the steplength with 2 helps.
-            if self.h<= 0.0001:
-                self.h=0.0001
+            if self.h<=2*10**-6:
+                self.h=2*10**-6
                 Wout, E = self.step(Win)
+                print("Break2")
                 return Wout, E
             self.divideStepByTwo()
             Wout,E = self.step(Win)
@@ -77,7 +75,6 @@ class RungeKuttaFehlberg54:
             
         self.adjustStep(E)
        # Wout[0] = Win[0] + self.h
-
         return Wout, E
 
     def isErrorTolerated(self,E):

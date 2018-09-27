@@ -16,8 +16,8 @@ class Orbit:
     GravConstant = 6.67408 * 10 ** (-11)
     M_e = 5.972 * 10 ** 24
     M_m = 7.34767309 * 10 ** 22
-    h = 0.1
-    tol = 05e-14
+    h = 0.00001
+    tol = 05e-7
     prevPositions = [[0], [384400000]]
 
     """
@@ -38,7 +38,6 @@ class Orbit:
                  ):
         self.GravConst = G
         self.mPlanet1 = m1
-        self.mPlanet2 = m2
         self.state = np.asarray(init_state, dtype='float')
         self.rkf54 = RKF.RungeKuttaFehlberg54(self.ydot, len(self.state), self.h, self.tol)
         self.prevPositions = self.prevPositions
@@ -58,23 +57,22 @@ class Orbit:
         y2 = self.state[7]
         return (x1, y1), (x2, y2)
 
-    def energy(self):
-        pxJ = self.state[1]
-        vxJ = self.state[2]
-        pyJ = self.state[3]
-        vyJ = self.state[4]
-        pxM = self.state[5]
-        vxM = self.state[6]
-        pyM = self.state[7]
-        vyM = self.state[8]
-        mJorda = self.mPlanet1
-        mManen = self.mPlanet2
-        G = self.GravConst
-        dist = np.sqrt((pxM - pxJ) ** 2 + (pyM - pyJ) ** 2)
-        uTot = -G * mJorda * mManen / dist
-        kJorda = mJorda * (vxJ ** 2 + vyJ ** 2) / 2
-        kManen = mManen * (vxM **2 + vyM**2)/2
-        return (kJorda + uTot + kManen )/(10**24)
+    # def energy(self):
+    #     pxJ = self.state[1]
+    #     vxJ = self.state[2]
+    #     pyJ = self.state[3]
+    #     vyJ = self.state[4]
+    #     pxM = self.state[5]
+    #     vxM = self.state[6]
+    #     pyM = self.state[7]
+    #     vyM = self.state[8]
+    #     mJorda = self.mPlanet1
+    #     G = self.GravConst
+    #     dist = np.sqrt((pxM - pxJ) ** 2 + (pyM - pyJ) ** 2)
+    #     uTot = -G * mJorda * mManen / dist
+    #     kJorda = mJorda * (vxJ ** 2 + vyJ ** 2) / 2
+    #     kManen = mManen * (vxM **2 + vyM**2)/2
+    #     return (kJorda + uTot + kManen )/(10**24)
 
     def time_elapsed(self):
         return self.state[0]
@@ -85,7 +83,6 @@ class Orbit:
 
     def ydot(self, x):
         mJorda = self.mPlanet1
-        mRak = self.mPlanet2
         pxJ = x[1]
         vxJ = x[2]
         pyJ = x[3]
@@ -105,19 +102,19 @@ class Orbit:
         z[5] = vxR
         z[6] = 0
         z[7] = vyR
-        z[8] = -oppskytning.tyngdekraft((pyR-pyJ), saturn_v.masse(x[0])) - oppskytning.luftmotstand((pyR-pyJ), vyR, x[0]) + saturn_v.skyvekraft(x[0])
+        z[8] = (-oppskytning.tyngdekraft((pyR-pyJ),oppskytning.masse(x[0])) - oppskytning.luftmotstand((pyR-pyJ),vyR,x[0]) + oppskytning.skyvekraft(x[0]))/oppskytning.masse(x[0])
         return z
 
 
 # make an Orbit instance
 # init_state: [t0, x0J, vx0J,  y0MJ   vy0J, x0R, vx0R,   y0R,    vy0R],
-orbit = Orbit([0,   0,     0,     0,   0,    0,   0, 6371000, 0])
+orbit = Orbit([0,   0,     0,     0,   0,    0,   0, 6371010, 0])
 dt = 1. / 30  # 30 frames per second
 
 # The figure is set
 fig = plot.figure()
-axes = fig.add_subplot(111, aspect='equal', autoscale_on=False,
-                       xlim=(-0.5 * 10 ** 9, 0.5 * 10 ** 9), ylim=(-0.5 * 10 ** 9, 0.5 * 10 ** 9))
+axes = fig.add_subplot(111, aspect='auto', autoscale_on=False,
+                       xlim=(-30000,30000), ylim=(6371000,6371000+70000))
 
 trail, = axes.plot([], [], 'r--', lw=0.5)
 lineA, = axes.plot([], [], 'o-b', lw=60, ms=12)  # A blue planet 6*10**6
@@ -141,22 +138,26 @@ def init():
 def animate(i):
     """perform animation step"""
     global orbit, dt
-    secondsPerFrame = 1.5
+    secondsPerFrame = 0.66
     t0 = orbit.state[0]
     while orbit.state[0] < t0 + secondsPerFrame:
         orbit.step()
-    posJ, posM = orbit.position()
-    x = posM[0]
-    y = posM[1]
+        print(orbit.state)
+    posJ, posR = orbit.position()
+    # print(orbit.state)
+    # print(orbit.rkf54.h)
+    x = posR[0]
+    y = posR[1]
+    height = posR[1]-6371010
     orbit.addPos(x, y)
     trail.set_data(orbit.getPos())
     lineA.set_data(*posJ)
-    lineB.set_data(*posM)
+    lineB.set_data(*posR)
     t1 = orbit.time_elapsed()
-    antallDager = t1 / (24 * 3600)
 
-    time_text.set_text('time %.3f Days' % antallDager)
-    energy_text.set_text('energy = %.5f YJ' % orbit.energy())
+
+    time_text.set_text('time %.3f S' % t1)
+    energy_text.set_text('Height = %.5f m' % height)
     return lineA, lineB, time_text, energy_text
 
 
