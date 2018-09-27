@@ -42,10 +42,7 @@ def temperatur(h):
 # Atmosfærens trykk som funksjon av høyde
 def trykk(h):
     if(atm_lag(h) == 1):
-        print("Høyde: "+str(h))
-        temp = 101290 * (temperatur(h)/288.08)**5.256
-        print("Trykk: "+str(temp))
-        return temp
+        return 101290 * (temperatur(h)/288.08)**5.256
     elif(atm_lag(h) ==2):
         return 127760 * np.exp(-0.000157*h)
     elif(atm_lag(h) == 3):
@@ -56,16 +53,18 @@ def trykk(h):
 
 # Atmosfærens tetthet som funksjon av høyde
 def tetthet(h):
-    luftetthet =(3.4855*trykk(h)/temperatur(h))
-    # print("Trykk: "+str(trykk(h)))
-    # print("Temperatur: "+str(temperatur(h)))
-    # print("Lufttetthet: "+ str(luftetthet))
-    return luftetthet
+    return 0.0034855*trykk(h)/temperatur(h)
 
 # Luftmotstand som funksjon av rakettens høyde, hastighet og tid etter oppskytning
 def luftmotstand(h0, v, t):
-    h = (h0 - radius_jord)
+    h = (h0 - 6371000)
+    # print("Luftmotstand: {}".format(0.5 * C_d * tetthet(h) * areal_del_1 * v**2))
     if(periode(t) == 0 or periode(t) == 1 or periode(t == 2)):
         return 0.5 * C_d * tetthet(h) * areal_del_1 * v**2
     else:
         return 0.5 * C_d * tetthet(h) * areal_del_3 * v**2
+
+
+
+# for i in range(103):
+#     print("temperatur: {}, trykk: {}, tetthet: {}".format(temperatur(i*1000), trykk(i*1000), tetthet(i*1000)))

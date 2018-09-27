@@ -5,7 +5,6 @@ import numpy as np
 # for Python2
 # from tkinter import *   ## notice capitalized T in Tkinter
 import scipy.integrate as integrate
-
 import matplotlib.pyplot as plot
 import matplotlib.animation as animation
 import oppskytning
@@ -16,8 +15,8 @@ class Orbit:
     GravConstant = 6.67408 * 10 ** (-11)
     M_e = 5.972 * 10 ** 24
     M_m = 7.34767309 * 10 ** 22
-    h = 0.00001
-    tol = 05e-7
+    h = 0.00000001
+    tol = 05e-14
     prevPositions = [[0], [384400000]]
 
     """
@@ -93,28 +92,29 @@ class Orbit:
         vyR = x[8]
 
         z = np.zeros(9)
-        dist = np.sqrt((pxR - pxJ) ** 2 + (pyR - pyJ) ** 2)
+        # dist = np.sqrt((pxR - pxJ) ** 2 + (pyR - pyJ) ** 2)
         z[0] = 1
         z[1] = 0
         z[2] = 0
         z[3] = 0
         z[4] = 0
-        z[5] = vxR
+        z[5] = 0
         z[6] = 0
         z[7] = vyR
-        z[8] = (-oppskytning.tyngdekraft((pyR-pyJ),oppskytning.masse(x[0])) - oppskytning.luftmotstand((pyR-pyJ),vyR,x[0]) + oppskytning.skyvekraft(x[0]))/oppskytning.masse(x[0])
+        z[8] = (-oppskytning.tyngdekraft((pyR-pyJ), saturn_v.masse(x[0])) - oppskytning.luftmotstand((pyR-pyJ), vyR, x[0]) + saturn_v.skyvekraft(x[0]))/oppskytning.masse(x[0])
+        if(x[0]%1<0.01):print(x[0], oppskytning.tyngdekraft((pyR-pyJ), saturn_v.masse(x[0]))/saturn_v.masse(x[0]),oppskytning.luftmotstand((pyR-pyJ), vyR, x[0])/saturn_v.masse(x[0]), saturn_v.skyvekraft(x[0])/saturn_v.masse(x[0]))
         return z
 
 
 # make an Orbit instance
 # init_state: [t0, x0J, vx0J,  y0MJ   vy0J, x0R, vx0R,   y0R,    vy0R],
-orbit = Orbit([0,   0,     0,     0,   0,    0,   0, 6371010, 0])
+orbit = Orbit([0,   0,     0,     0,   0,    0,   0, 6371000, 0])
 dt = 1. / 30  # 30 frames per second
 
 # The figure is set
 fig = plot.figure()
 axes = fig.add_subplot(111, aspect='auto', autoscale_on=False,
-                       xlim=(-30000,30000), ylim=(6371000,6371000+70000))
+                       xlim=(-30000,30000), ylim=(6371000,6371000+210000))
 
 trail, = axes.plot([], [], 'r--', lw=0.5)
 lineA, = axes.plot([], [], 'o-b', lw=60, ms=12)  # A blue planet 6*10**6
@@ -143,6 +143,7 @@ def animate(i):
     while orbit.state[0] < t0 + secondsPerFrame:
         orbit.step()
         print(orbit.state)
+    print("Fart: {}".format(orbit.state[8]))
     posJ, posR = orbit.position()
     # print(orbit.state)
     # print(orbit.rkf54.h)
