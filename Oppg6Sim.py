@@ -17,7 +17,7 @@ class Orbit:
     M_m = 7.34767309 * 10 ** 22
     h = 0.00000001
     tol = 05e-14
-    prevPositions = [[0], [384400000]]
+    prevPositions = [[0], [6371010]]
 
     """
 
@@ -92,14 +92,14 @@ class Orbit:
         vyR = x[8]
 
         z = np.zeros(9)
-        # dist = np.sqrt((pxR - pxJ) ** 2 + (pyR - pyJ) ** 2)
+        dist = np.sqrt((pxR - pxJ) ** 2 + (pyR - pyJ) ** 2)
         z[0] = 1
         z[1] = 0
         z[2] = 0
         z[3] = 0
         z[4] = 0
-        z[5] = 0
-        z[6] = 0
+        z[5] = vxR
+        z[6] = (-oppskytning.tyngdekraft((pyR-pyJ), saturn_v.masse(x[0])) - oppskytning.luftmotstand((pyR-pyJ), vyR, x[0]) + saturn_v.skyvekraft(x[0]))/oppskytning.masse(x[0])
         z[7] = vyR
         z[8] = (-oppskytning.tyngdekraft((pyR-pyJ), saturn_v.masse(x[0])) - oppskytning.luftmotstand((pyR-pyJ), vyR, x[0]) + saturn_v.skyvekraft(x[0]))/oppskytning.masse(x[0])
         # if(x[0]%1<0.01):print(x[0], oppskytning.tyngdekraft((pyR-pyJ), saturn_v.masse(x[0]))/saturn_v.masse(x[0]),oppskytning.luftmotstand((pyR-pyJ), vyR, x[0])/saturn_v.masse(x[0]), saturn_v.skyvekraft(x[0])/saturn_v.masse(x[0]))
@@ -114,10 +114,10 @@ dt = 1. / 30  # 30 frames per second
 # The figure is set
 fig = plot.figure()
 axes = fig.add_subplot(111, aspect='auto', autoscale_on=False,
-                       xlim=(-30000,30000), ylim=(6371000,6371000+310000))
+                       xlim=(-(2*6371000),2*6371000), ylim=(-(2*6371000),2*6371000))
 
 trail, = axes.plot([], [], 'r--', lw=0.5)
-lineA, = axes.plot([], [], 'o-b', lw=60, ms=12)  # A blue planet 6*10**6
+lineA, = axes.plot([], [], 'o-b', lw=60, ms=128)  # A blue planet 6*10**6
 lineB, = axes.plot([], [], 'o-r', lw=17, ms=3.4)  # A white planet
 
 # line2, = axes.plot([], [], 'o-y', lw=2)  # A yellow sun
@@ -138,7 +138,7 @@ def init():
 def animate(i):
     """perform animation step"""
     global orbit, dt
-    secondsPerFrame = 0.66
+    secondsPerFrame = 4
     t0 = orbit.state[0]
     while orbit.state[0] < t0 + secondsPerFrame:
         orbit.step()
@@ -150,7 +150,7 @@ def animate(i):
     y = posR[1]
     height = posR[1]-6371010
     orbit.addPos(x, y)
-    #trail.set_data(orbit.getPos())
+    trail.set_data(orbit.getPos())
     lineA.set_data(*posJ)
     lineB.set_data(*posR)
     t1 = orbit.time_elapsed()
@@ -183,7 +183,7 @@ anim = animation.FuncAnimation(fig,  # figure to plot in
 # the video can be embedded in html5.  You may need to adjust this for
 # your system: for more information, see
 # http://matplotlib.sourceforge.net/api/animation_api.html
-anim.save('saturn5sim.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
+# anim.save('saturn6sim.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
 
 
-#plot.show()
+plot.show()

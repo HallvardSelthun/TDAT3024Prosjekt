@@ -139,7 +139,7 @@ def init():
 def animate(i):
     """perform animation step"""
     global orbit, dt
-    secondsPerFrame = 3600 * 24 / 30
+    secondsPerFrame = 3600 * 24 / 36
     t0 = orbit.state[0]
     while orbit.state[0] < t0 + secondsPerFrame:
         orbit.step()
@@ -169,8 +169,8 @@ delay = 2000 * dt - (t1 - t0)
 
 anim = animation.FuncAnimation(fig,  # figure to plot in
                                animate,  # function that is called on each frame
-                               frames=900,  # total number of frames
-                               interval=delay,  # time to wait between each frame.
+                               frames=1200,  # total number of frames
+                               interval=1.0/30,  # time to wait between each frame.
                                repeat=False,
                                blit=True,
                                init_func=init  # initialization
@@ -181,8 +181,8 @@ anim = animation.FuncAnimation(fig,  # figure to plot in
 # the video can be embedded in html5.  You may need to adjust this for
 # your system: for more information, see
 # http://matplotlib.sourceforge.net/api/animation_api.html
-# anim.save('orbit.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
+anim.save('oppg3.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
 
 #
 #
-plot.show()
+#plot.show()
