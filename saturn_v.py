@@ -1,5 +1,5 @@
 import numpy as np
-
+from sklearn import datasets
 
 # Konstanter(SI-enheter) for del 1
 vekt_del_1 = 2290000
