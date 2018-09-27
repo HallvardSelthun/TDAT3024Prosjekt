@@ -8,7 +8,7 @@ G_k = 6.67 * 10**(-11)
 
 
 # Konstanter for luftmotstand TODO: NAvnsett bedre, din pikk Rakettens C_d kan kanskje bli bedre. Nå er den lik konstanten for en kule
-C_d = 1/2
+C_d = 0.25
 areal_del_1 = np.pi * 5.55**2
 areal_del_2 = np.pi * 5.55**2
 areal_del_3 = np.pi * 3.3**2
