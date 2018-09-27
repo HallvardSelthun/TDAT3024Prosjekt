@@ -44,7 +44,7 @@ def trykk(h):
     if(atm_lag(h) == 1):
         print("Høyde: "+str(h))
         temp = 101290 * (temperatur(h)/288.08)**5.256
-        print("Temperatur: "+str(temp))
+        print("Trykk: "+str(temp))
         return temp
     elif(atm_lag(h) ==2):
         return 127760 * np.exp(-0.000157*h)
