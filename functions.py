@@ -1,4 +1,0 @@
-"""
-Testingtesting
-"""
-print("Rakettforskning, yo")
