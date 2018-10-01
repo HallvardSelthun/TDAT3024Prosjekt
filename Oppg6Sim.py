@@ -4,7 +4,6 @@ import RungeKuttaFehlberg as RKF
 import numpy as np
 # for Python2
 # from tkinter import *   ## notice capitalized T in Tkinter
-import scipy.integrate as integrate
 import matplotlib.pyplot as plot
 import matplotlib.animation as animation
 import oppskytning6
@@ -14,7 +13,6 @@ grav =0
 skyve=0
 luft =0
 fart = 0
-
 
 class Orbit:
     GravConstant = 6.67408 * 10 ** (-11)
@@ -45,6 +43,7 @@ class Orbit:
         self.state = np.asarray(init_state, dtype='float')
         self.rkf54 = RKF.RungeKuttaFehlberg54(self.ydot, len(self.state), self.h, self.tol)
         self.prevPositions = self.prevPositions
+        self.check = 0
 
     def getPos(self):
         return self.prevPositions
@@ -85,6 +84,7 @@ class Orbit:
         w0 = self.state
         self.state, E = self.rkf54.safeStep(w0)
 
+
     def ydot(self, x):
         mJorda = self.mPlanet1
         pxJ = x[1]
@@ -96,14 +96,20 @@ class Orbit:
         pyR = x[7]
         vyR = x[8]
 
+
+        dist = np.sqrt((pxR - pxJ) ** 2 + (pyR - pyJ) ** 2)
+
         vinkelV = np.arctan(vyR/vxR)
-        vinkelR = np.arctan(pyR/pxR)
+        vinkelR = np.arcsin(pyR / dist)
+        if(pxR>0 and pyR > 0):
+            vinkelR = np.arcsin(pyR / dist)
+        elif(pxR<0 and pyR<0):
+            vinkelR = - np.pi/2 - (np.pi/2 + np.arcsin(pyR/dist))
         periode = saturn_v.periode(x[0])
-        if x[0] < 30:
+        if x[0] < 60:
             vinkelF= np.pi/2
         else:
-            vinkelF = vinkelV-(0.0172265625)*periode
-        dist = np.sqrt((pxR - pxJ) ** 2 + (pyR - pyJ) ** 2)
+            vinkelF = vinkelV-(0.04)*periode
         grav = oppskytning6.tyngdekraft(dist,  saturn_v.masse(x[0]))
         fart = np.sqrt(vxR**2 + vyR**2)
         skyve = saturn_v.skyvekraft(x[0])
@@ -118,11 +124,19 @@ class Orbit:
         z[3] = 0
         z[4] = 0
         z[5] = vxR
-        ax = (-grav*np.cos(vinkelR) + luft*np.cos(vinkelV+np.pi) + skyve*np.cos(vinkelF))/ oppskytning6.masse(x[0])
+        ax = (grav*np.cos(vinkelR+np.pi) + luft*np.cos(vinkelV+np.pi) + skyve*np.cos(vinkelF))/ oppskytning6.masse(x[0])
         z[6] = ax
         z[7] = vyR
-        ay = (-grav*np.sin(vinkelR) +luft*np.sin(vinkelV+np.pi) + skyve*np.sin(vinkelF)) / oppskytning6.masse(x[0])
+        ay = (grav*np.sin(vinkelR+np.pi) +luft*np.sin(vinkelV+np.pi) + skyve*np.sin(vinkelF)) / oppskytning6.masse(x[0])
         z[8] = ay
+
+
+        if(x[0]-self.check>100):
+            self.check = x[0]
+            print("ax: {}, ay: {}".format(ax, ay))
+            print("Vinkel R: {}".format(vinkelR))
+            print("Tid: {}, grav: {}".format(x[0], grav))
+            print("px: {}".format(pxR))
         return z
 
 
@@ -158,7 +172,7 @@ def init():
 def animate(i):
     """perform animation step"""
     global orbit, dt
-    secondsPerFrame = 10
+    secondsPerFrame = 40
     t0 = orbit.state[0]
     while orbit.state[0] < t0 + secondsPerFrame:
         orbit.step()
