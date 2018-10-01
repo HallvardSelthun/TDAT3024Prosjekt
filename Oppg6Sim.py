@@ -105,11 +105,15 @@ class Orbit:
             vinkelR = np.arcsin(pyR / dist)
         elif(pxR<0 and pyR<0):
             vinkelR = - np.pi/2 - (np.pi/2 + np.arcsin(pyR/dist))
+        elif(pxR<0 and pyR >0):
+            vinkelR = np.pi - np.arcsin(pyR/dist)
+
+
         periode = saturn_v.periode(x[0])
         if x[0] < 60:
             vinkelF= np.pi/2
         else:
-            vinkelF = vinkelV-(0.04)*periode
+            vinkelF = vinkelV-(0.044)*periode**2
         grav = oppskytning6.tyngdekraft(dist,  saturn_v.masse(x[0]))
         fart = np.sqrt(vxR**2 + vyR**2)
         skyve = saturn_v.skyvekraft(x[0])
@@ -205,7 +209,7 @@ delay = 2000 * dt - (t1 - t0)
 
 anim = animation.FuncAnimation(fig,  # figure to plot in
                                animate,  # function that is called on each frame
-                               frames=300,  # total number of frames
+                               frames=900,  # total number of frames
                                interval=delay,  # time to wait between each frame.
                                repeat=False,
                                blit=True,
