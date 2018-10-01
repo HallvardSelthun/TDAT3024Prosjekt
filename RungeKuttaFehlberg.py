@@ -71,6 +71,7 @@ class RungeKuttaFehlberg54:
             Wout,E = self.step(Win)
             counter = counter + 1
             if(counter>10):
+                print("Runge-Kutta-Failberg")
                 sys.exit(-1)
             
         self.adjustStep(E)

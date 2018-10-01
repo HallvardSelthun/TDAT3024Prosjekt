@@ -27,7 +27,7 @@ eksoshastighet_del_2 = skyvekraft_del_2/masseendring_per_sek_del_2
 vekt_del_3 = 123000
 tom_vekt_del_3 = 13500
 skyvekraft_del_3 = 1000000
-brenntid_del_3 = 500
+brenntid_del_3 = 165
 
 # Beregnede konstanter for del 3
 vekttap_del_3 = vekt_del_3 - tom_vekt_del_3
@@ -44,7 +44,6 @@ starttid_del_1 = 0
 starttid_del_2 = brenntid_del_1
 starttid_del_3 = brenntid_del_1 + brenntid_del_2
 sluttid = brenntid_del_1 + brenntid_del_2 + brenntid_del_3
-
 
 # Funksjon som returnerer 0-4 basert på hvilken forbrenningsperiode raketten befinner seg i
 def periode(tid):
