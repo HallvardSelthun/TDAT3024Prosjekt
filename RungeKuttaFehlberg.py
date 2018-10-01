@@ -53,8 +53,8 @@ class RungeKuttaFehlberg54:
             #Try to adjust the optimal step length
             self.adjustStep(E)
             Wout,E = self.step(Win)
-            if self.h<= 2*10**-6:
-                self.h= 2*10**-6
+            if self.h<= 2*10**-5:
+                self.h= 2*10**-5
                 print("Break1")
                 Wout, E = self.step(Win)
                 return Wout, E
@@ -62,8 +62,8 @@ class RungeKuttaFehlberg54:
         counter=0
         while(not self.isErrorTolerated(E)):
             #Try if dividing the steplength with 2 helps.
-            if self.h<=2*10**-6:
-                self.h=2*10**-6
+            if self.h<=2*10**-5:
+                self.h=2*10**-5
                 Wout, E = self.step(Win)
                 print("Break2")
                 return Wout, E

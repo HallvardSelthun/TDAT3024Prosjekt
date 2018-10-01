@@ -7,8 +7,13 @@ import numpy as np
 import scipy.integrate as integrate
 import matplotlib.pyplot as plot
 import matplotlib.animation as animation
-import oppskytning5
+import oppskytning6
 import saturn_v
+
+grav =0
+skyve=0
+luft =0
+fart = 0
 
 
 class Orbit:
@@ -16,7 +21,7 @@ class Orbit:
     M_e = 5.972 * 10 ** 24
     M_m = 7.34767309 * 10 ** 22
     h = 0.00000001
-    tol = 05e-14
+    tol = 05e-10
     prevPositions = [[0], [6371010]]
 
     """
@@ -91,27 +96,39 @@ class Orbit:
         pyR = x[7]
         vyR = x[8]
 
-        vinkelV = 0
-        vinkelR =0
-        vinkelF =0
-        z = np.zeros(9)
+        vinkelV = np.arctan(vyR/vxR)
+        vinkelR = np.arctan(pyR/pxR)
+        periode = saturn_v.periode(x[0])
+        if x[0] < 30:
+            vinkelF= np.pi/2
+        else:
+            vinkelF = vinkelV-(0.0172265625)*periode
         dist = np.sqrt((pxR - pxJ) ** 2 + (pyR - pyJ) ** 2)
+        grav = oppskytning6.tyngdekraft(dist,  saturn_v.masse(x[0]))
+        fart = np.sqrt(vxR**2 + vyR**2)
+        skyve = saturn_v.skyvekraft(x[0])
+        luft = oppskytning6.luftmotstand(dist, fart, x[0])
+
+        z = np.zeros(9)
+        # print("G: "+str(grav/saturn_v.masse(x[0])))
+        # print("Skyvekraft: "+str(saturn_v.skyvekraft(x[0])/saturn_v.masse(x[0])))
         z[0] = 1
         z[1] = 0
         z[2] = 0
         z[3] = 0
         z[4] = 0
         z[5] = vxR
-        z[6] = (-oppskytning5.tyngdekraft((pyR - pyJ), saturn_v.masse(x[0])) - oppskytning5.luftmotstand((pyR - pyJ), vyR, x[0]) + saturn_v.skyvekraft(x[0])) / oppskytning5.masse(x[0])
+        ax = (-grav*np.cos(vinkelR) + luft*np.cos(vinkelV+np.pi) + skyve*np.cos(vinkelF))/ oppskytning6.masse(x[0])
+        z[6] = ax
         z[7] = vyR
-        z[8] = (-oppskytning5.tyngdekraft((pyR - pyJ), saturn_v.masse(x[0])) - oppskytning5.luftmotstand((pyR - pyJ), vyR, x[0]) + saturn_v.skyvekraft(x[0])) / oppskytning5.masse(x[0])
-        # if(x[0]%1<0.01):print(x[0], oppskytning.tyngdekraft((pyR-pyJ), saturn_v.masse(x[0]))/saturn_v.masse(x[0]),oppskytning.luftmotstand((pyR-pyJ), vyR, x[0])/saturn_v.masse(x[0]), saturn_v.skyvekraft(x[0])/saturn_v.masse(x[0]))
+        ay = (-grav*np.sin(vinkelR) +luft*np.sin(vinkelV+np.pi) + skyve*np.sin(vinkelF)) / oppskytning6.masse(x[0])
+        z[8] = ay
         return z
 
 
 # make an Orbit instance
 # init_state: [t0, x0J, vx0J,  y0MJ   vy0J, x0R, vx0R,   y0R,    vy0R],
-orbit = Orbit([0,   0,     0,     0,   0,    0,   0, 6371000, 0])
+orbit = Orbit([0,   0,     0,     0,   0.1,    1,   0.1, 6371000, 0.1])
 dt = 1. / 30  # 30 frames per second
 
 # The figure is set
@@ -141,26 +158,26 @@ def init():
 def animate(i):
     """perform animation step"""
     global orbit, dt
-    secondsPerFrame = 4
+    secondsPerFrame = 10
     t0 = orbit.state[0]
     while orbit.state[0] < t0 + secondsPerFrame:
         orbit.step()
-    # print("Fart: {}".format(orbit.state[8]))
     posJ, posR = orbit.position()
-    # print(orbit.state)
-    # print(orbit.rkf54.h)
     x = posR[0]
     y = posR[1]
-    height = posR[1]-6371010
+    height = (np.sqrt(posR[1]**2+posR[0]**2)-oppskytning6.radius_jord)/1000
+    if height < 0:
+        raise ValueError('RIP IN PIECES; BOMBOM')
     orbit.addPos(x, y)
     trail.set_data(orbit.getPos())
     lineA.set_data(*posJ)
     lineB.set_data(*posR)
+    # plot.quiver(posR, (1000,5000),(-2000,7000), color=['r', 'b', 'g'], scale=21)
     t1 = orbit.time_elapsed()
 
 
     time_text.set_text('time %.3f S' % t1)
-    energy_text.set_text('Height = %.5f m' % height)
+    energy_text.set_text('Height = %.5f km' % height)
     return lineA, lineB, time_text, energy_text
 
 
