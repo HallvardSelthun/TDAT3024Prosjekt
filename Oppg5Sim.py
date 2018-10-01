@@ -7,7 +7,7 @@ import numpy as np
 import scipy.integrate as integrate
 import matplotlib.pyplot as plot
 import matplotlib.animation as animation
-import oppskytning
+import oppskytning5
 import saturn_v
 
 
@@ -101,7 +101,7 @@ class Orbit:
         z[5] = 0
         z[6] = 0
         z[7] = vyR
-        z[8] = (-oppskytning.tyngdekraft((pyR-pyJ), saturn_v.masse(x[0])) - oppskytning.luftmotstand((pyR-pyJ), vyR, x[0]) + saturn_v.skyvekraft(x[0]))/oppskytning.masse(x[0])
+        z[8] = (-oppskytning5.tyngdekraft((pyR - pyJ), saturn_v.masse(x[0])) - oppskytning5.luftmotstand((pyR - pyJ), vyR, x[0]) + saturn_v.skyvekraft(x[0])) / oppskytning5.masse(x[0])
         # if(x[0]%1<0.01):print(x[0], oppskytning.tyngdekraft((pyR-pyJ), saturn_v.masse(x[0]))/saturn_v.masse(x[0]),oppskytning.luftmotstand((pyR-pyJ), vyR, x[0])/saturn_v.masse(x[0]), saturn_v.skyvekraft(x[0])/saturn_v.masse(x[0]))
         return z
 
@@ -148,7 +148,7 @@ def animate(i):
     # print(orbit.rkf54.h)
     x = posR[0]
     y = posR[1]
-    height = posR[1]-6371010
+    height = (posR[1]-6371010)/1000
     orbit.addPos(x, y)
     #trail.set_data(orbit.getPos())
     lineA.set_data(*posJ)
@@ -157,7 +157,7 @@ def animate(i):
 
 
     time_text.set_text('time %.3f S' % t1)
-    energy_text.set_text('Height = %.5f m' % height)
+    energy_text.set_text('Height = %.5f km' % height)
     return lineA, lineB, time_text, energy_text
 
 
@@ -183,7 +183,7 @@ anim = animation.FuncAnimation(fig,  # figure to plot in
 # the video can be embedded in html5.  You may need to adjust this for
 # your system: for more information, see
 # http://matplotlib.sourceforge.net/api/animation_api.html
-anim.save('saturn5sim.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
+# anim.save('saturn5sim.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
 
 
-#plot.show()
+plot.show()

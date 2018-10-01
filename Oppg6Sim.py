@@ -7,7 +7,7 @@ import numpy as np
 import scipy.integrate as integrate
 import matplotlib.pyplot as plot
 import matplotlib.animation as animation
-import oppskytning
+import oppskytning5
 import saturn_v
 
 
@@ -91,6 +91,9 @@ class Orbit:
         pyR = x[7]
         vyR = x[8]
 
+        vinkelV = 0
+        vinkelR =0
+        vinkelF =0
         z = np.zeros(9)
         dist = np.sqrt((pxR - pxJ) ** 2 + (pyR - pyJ) ** 2)
         z[0] = 1
@@ -99,9 +102,9 @@ class Orbit:
         z[3] = 0
         z[4] = 0
         z[5] = vxR
-        z[6] = (-oppskytning.tyngdekraft((pyR-pyJ), saturn_v.masse(x[0])) - oppskytning.luftmotstand((pyR-pyJ), vyR, x[0]) + saturn_v.skyvekraft(x[0]))/oppskytning.masse(x[0])
+        z[6] = (-oppskytning5.tyngdekraft((pyR - pyJ), saturn_v.masse(x[0])) - oppskytning5.luftmotstand((pyR - pyJ), vyR, x[0]) + saturn_v.skyvekraft(x[0])) / oppskytning5.masse(x[0])
         z[7] = vyR
-        z[8] = (-oppskytning.tyngdekraft((pyR-pyJ), saturn_v.masse(x[0])) - oppskytning.luftmotstand((pyR-pyJ), vyR, x[0]) + saturn_v.skyvekraft(x[0]))/oppskytning.masse(x[0])
+        z[8] = (-oppskytning5.tyngdekraft((pyR - pyJ), saturn_v.masse(x[0])) - oppskytning5.luftmotstand((pyR - pyJ), vyR, x[0]) + saturn_v.skyvekraft(x[0])) / oppskytning5.masse(x[0])
         # if(x[0]%1<0.01):print(x[0], oppskytning.tyngdekraft((pyR-pyJ), saturn_v.masse(x[0]))/saturn_v.masse(x[0]),oppskytning.luftmotstand((pyR-pyJ), vyR, x[0])/saturn_v.masse(x[0]), saturn_v.skyvekraft(x[0])/saturn_v.masse(x[0]))
         return z
 
