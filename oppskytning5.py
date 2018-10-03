@@ -9,8 +9,8 @@ G_k = 6.67 * 10**(-11)
 
 # Konstanter for luftmotstand
 C_d = 0.25
-areal_del_1 = np.pi * 5.55**2
-areal_del_2 = np.pi * 5.55**2
+areal_del_1 = np.pi * 5.05**2
+areal_del_2 = np.pi * 5.05**2
 areal_del_3 = np.pi * 3.3**2
 
 print(areal_del_1, areal_del_2, areal_del_3)
