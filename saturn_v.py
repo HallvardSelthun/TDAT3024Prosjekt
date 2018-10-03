@@ -84,3 +84,17 @@ def skyvekraft(tid):
     else:
         return 0
 
+print("Midlere drivstoffforbruk i kg/s: \n"
+      "1: {}\n"
+      "2: {}\n"
+      "3: {}".format(masseendring_per_sek_del_1, masseendring_per_sek_del_2, masseendring_per_sek_del_3))
+
+print("Eksoshastighet i m/s: \n"
+      "1: {}\n"
+      "2: {}\n"
+      "3: {}".format(eksoshastighet_del_1, eksoshastighet_del_2, eksoshastighet_del_3))
+
+print("Rakettmasse før antenning av hvert trinn i kg: \n"
+      "1: {}\n"
+      "2: {}\n"
+      "3: {}".format(total_vekt_del_1, total_vekt_del_2, total_vekt_del_3))
