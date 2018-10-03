@@ -13,6 +13,8 @@ areal_del_1 = np.pi * 5.55**2
 areal_del_2 = np.pi * 5.55**2
 areal_del_3 = np.pi * 3.3**2
 
+print(areal_del_1, areal_del_2, areal_del_3)
+
 # Tyngdekraft på raketten gitt av avstand til jorda og rakettens masse
 def tyngdekraft(a, m):
     return G_k * masse_jord * m / (a**2)
