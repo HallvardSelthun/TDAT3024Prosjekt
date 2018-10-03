@@ -7,7 +7,8 @@ masse_jord = 5.9736 * 10**24
 G_k = 6.67 * 10**(-11)
 
 
-# Konstanter for luftmotstand TODO: NAvnsett bedre, din pikk Rakettens C_d kan kanskje bli bedre. Nå er den lik konstanten for en kule
+# Konstanter for luftmotstand
+# C_d satt til litt større enn en sylinder med kjegletopp
 C_d = 0.25
 areal_del_1 = np.pi * 5.05**2
 areal_del_2 = np.pi * 5.05**2

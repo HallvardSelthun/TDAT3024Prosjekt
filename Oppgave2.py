@@ -1,5 +1,5 @@
 import numpy as np
-import RKFUnmodded as RKF
+import RungeKuttaFehlberg as RKF
 import math
 import time
 import matplotlib.pyplot as plot

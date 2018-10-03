@@ -55,7 +55,7 @@ class RungeKuttaFehlberg54:
             Wout,E = self.step(Win)
             if self.h<= 2*10**-5:
                 self.h= 2*10**-5
-                print("Break1")
+                print("Minimal h reached, hardsetting and returning")
                 Wout, E = self.step(Win)
                 return Wout, E
         # If the error is still not tolerable
@@ -65,13 +65,13 @@ class RungeKuttaFehlberg54:
             if self.h<=2*10**-5:
                 self.h=2*10**-5
                 Wout, E = self.step(Win)
-                print("Break2")
+                print("Minimal h reached, hardsetting and returning")
                 return Wout, E
             self.divideStepByTwo()
             Wout,E = self.step(Win)
             counter = counter + 1
             if(counter>10):
-                print("Runge-Kutta-Failberg")
+                print("counter exceeded, exiting system")
                 sys.exit(-1)
             
         self.adjustStep(E)
@@ -94,24 +94,3 @@ class RungeKuttaFehlberg54:
     def setStepLength(self,stepLength):
         self.h=stepLength        
         
-
-
-
-# def main():
-    # W  =np.array([0, 0, 0, 0])
-    # h=0.1
-    # tol=05e-14
-    # tEnd=1.0
-    # rkf54 = RungeKuttaFehlberg54(F,4,h,tol)
-    #
-    # while(W[0]<tEnd):
-    #     W , E = rkf54.safeStep(W)
-    #
-    # rkf54.setStepLength(tEnd-W[0])
-    # W,E = rkf54.step(W)
-    #
-    # print(W,E)
-#
-# if __name__ == "__main__":
-#     # execute only if run as a script
-#     main()

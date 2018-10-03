@@ -56,22 +56,23 @@ class Orbit:
         y2 = self.state[7]
         return (x1, y1), (x2, y2)
 
-    # def energy(self):
-    #     pxJ = self.state[1]
-    #     vxJ = self.state[2]
-    #     pyJ = self.state[3]
-    #     vyJ = self.state[4]
-    #     pxM = self.state[5]
-    #     vxM = self.state[6]
-    #     pyM = self.state[7]
-    #     vyM = self.state[8]
-    #     mJorda = self.mPlanet1
-    #     G = self.GravConst
-    #     dist = np.sqrt((pxM - pxJ) ** 2 + (pyM - pyJ) ** 2)
-    #     uTot = -G * mJorda * mManen / dist
-    #     kJorda = mJorda * (vxJ ** 2 + vyJ ** 2) / 2
-    #     kManen = mManen * (vxM **2 + vyM**2)/2
-    #     return (kJorda + uTot + kManen )/(10**24)
+    def energy(self):
+        pxJ = self.state[1]
+        vxJ = self.state[2]
+        pyJ = self.state[3]
+        vyJ = self.state[4]
+        pxR = self.state[5]
+        vxR = self.state[6]
+        pyR = self.state[7]
+        vyR = self.state[8]
+        mJorda = self.mPlanet1
+        G = self.GravConst
+        mR = oppskytning5.masse(self.state[0])
+        dist = np.sqrt((pxR - pxJ) ** 2 + (pyR - pyJ) ** 2)
+        uTot = -G * mJorda * mR / dist
+        kJorda = mJorda * (vxJ ** 2 + vyJ ** 2) / 2
+        kR = mR * (vxR **2 + vyR**2)/2
+        return (kJorda + uTot + kR )/(10**24)
 
     def time_elapsed(self):
         return self.state[0]
@@ -102,7 +103,6 @@ class Orbit:
         z[6] = 0
         z[7] = vyR
         z[8] = (-oppskytning5.tyngdekraft((pyR - pyJ), saturn_v.masse(x[0])) - oppskytning5.luftmotstand((pyR - pyJ), vyR, x[0]) + saturn_v.skyvekraft(x[0])) / oppskytning5.masse(x[0])
-        # if(x[0]%1<0.01):print(x[0], oppskytning.tyngdekraft((pyR-pyJ), saturn_v.masse(x[0]))/saturn_v.masse(x[0]),oppskytning.luftmotstand((pyR-pyJ), vyR, x[0])/saturn_v.masse(x[0]), saturn_v.skyvekraft(x[0])/saturn_v.masse(x[0]))
         return z
 
 
@@ -114,7 +114,7 @@ dt = 1. / 30  # 30 frames per second
 # The figure is set
 fig = plot.figure()
 axes = fig.add_subplot(111, aspect='auto', autoscale_on=False,
-                       xlim=(-30000,30000), ylim=(6371000,6371000+310000))
+                       xlim=(-30000,30000), ylim=(6371000,6371000+1210000))
 
 trail, = axes.plot([], [], 'r--', lw=0.5)
 lineA, = axes.plot([], [], 'o-b', lw=60, ms=12)  # A blue planet 6*10**6
@@ -122,7 +122,9 @@ lineB, = axes.plot([], [], 'o-r', lw=17, ms=3.4)  # A white planet
 
 # line2, = axes.plot([], [], 'o-y', lw=2)  # A yellow sun
 time_text = axes.text(0.02, 0.95, '', transform=axes.transAxes)
-energy_text = axes.text(0.02, 0.90, '', transform=axes.transAxes)
+height_text = axes.text(0.02, 0.90, '', transform=axes.transAxes)
+energy_text = axes.text(0.02, 0.85, '', transform=axes.transAxes)
+
 
 
 def init():
@@ -138,26 +140,23 @@ def init():
 def animate(i):
     """perform animation step"""
     global orbit, dt
-    secondsPerFrame = 0.66
+    secondsPerFrame = 0.3
     t0 = orbit.state[0]
     while orbit.state[0] < t0 + secondsPerFrame:
         orbit.step()
-    # print("Fart: {}".format(orbit.state[8]))
     posJ, posR = orbit.position()
-    # print(orbit.state)
-    # print(orbit.rkf54.h)
     x = posR[0]
     y = posR[1]
     height = (posR[1]-6371010)/1000
     orbit.addPos(x, y)
-    #trail.set_data(orbit.getPos())
     lineA.set_data(*posJ)
     lineB.set_data(*posR)
     t1 = orbit.time_elapsed()
 
-
     time_text.set_text('time %.3f S' % t1)
-    energy_text.set_text('Height = %.5f km' % height)
+    height_text.set_text('Height = %.5f km' % height)
+    energy_text.set_text('Energy = %.5f J' % orbit.energy())
+
     return lineA, lineB, time_text, energy_text
 
 
@@ -183,7 +182,7 @@ anim = animation.FuncAnimation(fig,  # figure to plot in
 # the video can be embedded in html5.  You may need to adjust this for
 # your system: for more information, see
 # http://matplotlib.sourceforge.net/api/animation_api.html
-# anim.save('saturn5sim.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
+anim.save('Oppgave5.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
 
 
-plot.show()
+# plot.show()
